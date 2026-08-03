@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { BASE_URL } from "../config";
 
 export default function DashPosts() {
   const { currentUser } = useSelector((state) => state.user);
@@ -15,7 +16,7 @@ export default function DashPosts() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch("/api/post/getposts", {
+        const res = await fetch(BASE_URL + "/api/post/getposts", {
           credentials: "include",  // ✅ fix
         });
         const data = await res.json();
@@ -36,7 +37,7 @@ export default function DashPosts() {
   const handleShowMore = async () => {
     try {
       const startIndex = userPosts.length;
-      const res = await fetch(`/api/post/getposts?startIndex=${startIndex}`, {
+      const res = await fetch(`${BASE_URL}/api/post/getposts?startIndex=${startIndex}`, {
         credentials: "include",  // ✅ fix
       });
       const data = await res.json();
@@ -53,7 +54,7 @@ export default function DashPosts() {
     setShowModal(false);
     try {
       const res = await fetch(
-        `/api/post/deletepost/${postIdToDelete}/${currentUser._id}`,
+        `${BASE_URL}/api/post/deletepost/${postIdToDelete}/${currentUser._id}`,
         {
           method: "DELETE",
           credentials: "include",  // ✅ fix

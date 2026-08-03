@@ -20,6 +20,7 @@ import { FaMoon, FaSun } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/themeSlice";
 import { signOutSuccess } from "../redux/user/userSlice";
+import { BASE_URL } from "../config";
 
 export default function Header() {
   const path = useLocation().pathname;
@@ -50,7 +51,7 @@ export default function Header() {
 
   const handleSignout = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/user/signout", {
+      const res = await fetch(BASE_URL + "/api/user/signout", {
         method: "POST",
         credentials: "include",
       });

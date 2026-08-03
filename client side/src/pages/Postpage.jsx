@@ -9,6 +9,7 @@ import {
 import CallToAction from "../components/CallToAction";
 import CommentSection from "../components/CommentSection";
 import PostCard from "../components/PostCard";
+import { BASE_URL } from "../config";
 
 export default function PostPage() {
 
@@ -31,7 +32,7 @@ export default function PostPage() {
         setLoading(true);
 
         const res = await fetch(
-          `/api/post/getposts?slug=${postSlug}`
+          `${BASE_URL}/api/post/getposts?slug=${postSlug}`
         );
 
         const data = await res.json();
@@ -70,7 +71,7 @@ export default function PostPage() {
       try {
 
         const res = await fetch(
-          "/api/post/getposts?limit=3"
+          `${BASE_URL}/api/post/getposts?limit=3`
         );
 
         const data = await res.json();

@@ -2,6 +2,7 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { FaThumbsUp } from "react-icons/fa";
 import { Button } from "flowbite-react";
+import { BASE_URL } from "../config";
 
 export default function Comment({
   comment,
@@ -17,7 +18,7 @@ export default function Comment({
   useEffect(() => {
     const getUser = async () => {
       try {
-        const res = await fetch(`/api/user/${comment.userId}`);
+        const res = await fetch(`${BASE_URL}/api/user/${comment.userId}`);
         const data = await res.json();
         if (res.ok) setUser(data);
       } catch (error) {
@@ -40,11 +41,11 @@ export default function Comment({
   const handleSave = async () => {
     try {
       const res = await fetch(
-        `/api/comment/editComment/${comment._id}`,
+        `${BASE_URL}/api/comment/editComment/${comment._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", // ✅ add kiya
+          credentials: "include",
           body: JSON.stringify({ content: editedContent }),
         }
       );
@@ -59,7 +60,6 @@ export default function Comment({
 
   return (
     <div className="flex items-start gap-3 border-b border-gray-200 py-4">
-
       {/* Profile picture */}
       <div className="w-10 h-10 rounded-full border-2 border-gray-500 overflow-hidden flex-shrink-0">
         <img
@@ -73,7 +73,6 @@ export default function Comment({
       </div>
 
       <div className="flex-1">
-
         {/* Username + time */}
         <div className="flex items-center mb-1 gap-2">
           <span className="font-bold text-xs truncate">
@@ -118,14 +117,13 @@ export default function Comment({
 
         {/* Actions */}
         <div className="flex items-center gap-2 mt-2">
-
           {/* Like */}
           <button
             type="button"
             onClick={() => onLike(comment._id)}
             className={`cursor-pointer text-gray-400 hover:text-blue-500 ${
               currentUser &&
-              comment.likes.includes(currentUser._id) // ✅ _id use karo
+              comment.likes.includes(currentUser._id)
                 ? "!text-blue-500"
                 : ""
             }`}
@@ -141,7 +139,7 @@ export default function Comment({
               }`}
           </p>
 
-          {/* ✅ Edit/Delete — _id se compare karo */}
+          {/* Edit/Delete */}
           {currentUser &&
             (String(currentUser._id) === String(comment.userId) ||
               currentUser.isAdmin) && (

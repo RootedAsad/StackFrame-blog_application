@@ -16,6 +16,7 @@ import {
 } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import { signOutSuccess } from "../redux/user/userSlice";
+import { BASE_URL } from "../config";
 
 export default function DashSidebar() {
   const location = useLocation();
@@ -33,7 +34,7 @@ export default function DashSidebar() {
   // Sign out current user
   const handleSignout = async () => {
     try {
-      const res = await fetch("/api/user/signout", { method: "POST" });
+      const res = await fetch(BASE_URL + "/api/user/signout", { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         console.log(data.message);

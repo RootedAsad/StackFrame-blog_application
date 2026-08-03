@@ -1,6 +1,7 @@
 // src/components/DashComments.jsx
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { BASE_URL } from "../config";
 
 export default function DashComments() {
   const { currentUser } = useSelector((state) => state.user);
@@ -13,7 +14,7 @@ export default function DashComments() {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const res = await fetch("/api/comment/getcomments", {
+        const res = await fetch(BASE_URL + "/api/comment/getcomments", {
           credentials: "include",
         });
         const data = await res.json();
@@ -35,7 +36,7 @@ export default function DashComments() {
     const startIndex = comments.length;
     try {
       const res = await fetch(
-        `/api/comment/getcomments?startIndex=${startIndex}`,
+        `${BASE_URL}/api/comment/getcomments?startIndex=${startIndex}`,
         { credentials: "include" }
       );
       const data = await res.json();
@@ -51,7 +52,7 @@ export default function DashComments() {
   const handleDeleteComment = async () => {
     try {
       const res = await fetch(
-        `/api/comment/deletecomment/${commentToDelete}`,
+        `${BASE_URL}/api/comment/deletecomment/${commentToDelete}`,
         {
           method: "DELETE",
           credentials: "include",

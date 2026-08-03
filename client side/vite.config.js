@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     flowbiteReact(),
-  ],
+],
 
   server: {
     proxy: {

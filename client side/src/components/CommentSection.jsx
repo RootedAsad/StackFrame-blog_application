@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button, Textarea, Modal } from "flowbite-react";
 import Comment from "./Comment";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { BASE_URL } from "../config";
 
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
@@ -19,7 +20,9 @@ export default function CommentSection({ postId }) {
   useEffect(() => {
     const getComments = async () => {
       try {
-        const res = await fetch(`/api/comment/getPostComments/${postId}`);
+        const res = await fetch(
+          `${BASE_URL}/api/comment/getPostComments/${postId}`
+        );
         if (res.ok) {
           const data = await res.json();
           setComments(data);
@@ -38,7 +41,7 @@ export default function CommentSection({ postId }) {
     if (!comment.trim()) return;
 
     try {
-      const res = await fetch("/api/comment/create", {
+      const res = await fetch(BASE_URL + "/api/comment/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -53,7 +56,6 @@ export default function CommentSection({ postId }) {
 
       if (res.ok) {
         setComment("");
-        // Add new comment to top of list
         setComments([data, ...comments]);
       }
     } catch (error) {
@@ -64,24 +66,30 @@ export default function CommentSection({ postId }) {
   // Toggle like on a comment
   const handleLike = async (commentId) => {
     try {
-      // Redirect to sign in if not logged in
       if (!currentUser) {
         navigate("/sign-in");
         return;
       }
 
-      const res = await fetch(`/api/comment/likeComment/${commentId}`, {
-        method: "PUT",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${BASE_URL}/api/comment/likeComment/${commentId}`,
+        {
+          method: "PUT",
+          credentials: "include",
+        }
+      );
 
       if (res.ok) {
         const data = await res.json();
-        // Update likes count in local state
+
         setComments(
           comments.map((c) =>
             c._id === commentId
-              ? { ...c, likes: data.likes, numberOfLikes: data.likes.length }
+              ? {
+                  ...c,
+                  likes: data.likes,
+                  numberOfLikes: data.likes.length,
+                }
               : c
           )
         );
@@ -95,7 +103,9 @@ export default function CommentSection({ postId }) {
   const handleEdit = (comment, editedContent) => {
     setComments(
       comments.map((c) =>
-        c._id === comment._id ? { ...c, content: editedContent } : c
+        c._id === comment._id
+          ? { ...c, content: editedContent }
+          : c
       )
     );
   };
@@ -104,7 +114,7 @@ export default function CommentSection({ postId }) {
   const handleDeleteComment = async () => {
     try {
       const res = await fetch(
-        `/api/comment/deleteComment/${commentToDelete}`,
+        `${BASE_URL}/api/comment/deleteComment/${commentToDelete}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -114,8 +124,9 @@ export default function CommentSection({ postId }) {
       const data = await res.json();
 
       if (res.ok) {
-        // Remove deleted comment from local state
-        setComments(comments.filter((c) => c._id !== commentToDelete));
+        setComments(
+          comments.filter((c) => c._id !== commentToDelete)
+        );
         setShowModal(false);
       } else {
         console.log(data.message);
@@ -127,8 +138,6 @@ export default function CommentSection({ postId }) {
 
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
-
-      {/* Show signed in user info or sign in prompt */}
       {currentUser ? (
         <div className="flex items-center gap-2 text-sm my-5 text-gray-500">
           <p>Signed in as:</p>
@@ -150,13 +159,15 @@ export default function CommentSection({ postId }) {
       ) : (
         <div className="text-sm text-teal-500 my-5 flex gap-1">
           You must be signed in to comment.
-          <Link className="text-blue-500 hover:underline" to="/sign-in">
+          <Link
+            className="text-blue-500 hover:underline"
+            to="/sign-in"
+          >
             Sign In
           </Link>
         </div>
       )}
 
-      {/* Comment input form — only shown when logged in */}
       {currentUser && (
         <form
           onSubmit={handleSubmit}
@@ -170,23 +181,24 @@ export default function CommentSection({ postId }) {
             value={comment}
           />
           <div className="flex justify-between items-center mt-5">
-            {/* Character counter */}
             <p className="text-gray-500 text-xs">
               {200 - comment.length} characters remaining
             </p>
-            <Button outline gradientDuoTone="purpleToBlue" type="submit">
+            <Button
+              outline
+              gradientDuoTone="purpleToBlue"
+              type="submit"
+            >
               Submit
             </Button>
           </div>
         </form>
       )}
 
-      {/* Comments list or empty state */}
       {comments.length === 0 ? (
         <p className="text-sm my-5">No comments yet!</p>
       ) : (
         <>
-          {/* Comment count badge */}
           <div className="text-sm my-5 flex items-center gap-1">
             <p>Comments</p>
             <div className="border border-gray-400 py-1 px-2 rounded-sm">
@@ -194,7 +206,6 @@ export default function CommentSection({ postId }) {
             </div>
           </div>
 
-          {/* Render each comment */}
           {comments.map((comment) => (
             <Comment
               key={comment._id}
@@ -211,7 +222,6 @@ export default function CommentSection({ postId }) {
         </>
       )}
 
-      {/* Delete confirmation modal */}
       <Modal
         show={showModal}
         onClose={() => setShowModal(false)}
@@ -224,10 +234,16 @@ export default function CommentSection({ postId }) {
             Are you sure you want to delete this comment?
           </h3>
           <div className="flex justify-center gap-4">
-            <Button color="failure" onClick={handleDeleteComment}>
+            <Button
+              color="failure"
+              onClick={handleDeleteComment}
+            >
               Yes, I'm sure
             </Button>
-            <Button color="gray" onClick={() => setShowModal(false)}>
+            <Button
+              color="gray"
+              onClick={() => setShowModal(false)}
+            >
               No, cancel
             </Button>
           </div>

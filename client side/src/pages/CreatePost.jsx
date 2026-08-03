@@ -11,6 +11,7 @@ import "react-quill/dist/quill.snow.css";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../config";
 
 export default function CreatePost() {
 
@@ -39,7 +40,7 @@ export default function CreatePost() {
 
       data.append("image", imageFile);
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch(BASE_URL + "/api/upload", {
         method: "POST",
         credentials: "include",
         body: data,
@@ -97,7 +98,7 @@ export default function CreatePost() {
 
       console.log(formData);
 
-      const res = await fetch("/api/post/create", {
+      const res = await fetch(BASE_URL + "/api/post/create", {
 
         method: "POST",
 

@@ -1,0 +1,1 @@
+export const BASE_URL = "https://mern-blog-d9wm.vercel.app";

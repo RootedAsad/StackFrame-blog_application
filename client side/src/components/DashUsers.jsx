@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { BASE_URL } from "../config";
 
 export default function DashUsers() {
   const { currentUser } = useSelector((state) => state.user);
@@ -14,7 +15,7 @@ export default function DashUsers() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch("/api/user/getusers", {
+        const res = await fetch(BASE_URL + "/api/user/getusers", {
           credentials: "include",
         });
         const data = await res.json();
@@ -39,7 +40,7 @@ export default function DashUsers() {
     try {
       const startIndex = users.length;
       const res = await fetch(
-        `/api/user/getusers?startIndex=${startIndex}`,
+        `${BASE_URL}/api/user/getusers?startIndex=${startIndex}`,
         { credentials: "include" }
       );
       const data = await res.json();
@@ -54,7 +55,7 @@ export default function DashUsers() {
 
   const handleDeleteUser = async () => {
     try {
-      const res = await fetch(`/api/user/delete/${userIdToDelete}`, {
+      const res = await fetch(`${BASE_URL}/api/user/delete/${userIdToDelete}`, {
         method: "DELETE",
         credentials: "include",
       });

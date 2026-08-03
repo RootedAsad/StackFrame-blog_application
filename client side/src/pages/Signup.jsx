@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate} from "react-router-dom";
 import { Alert, Button, Spinner, TextInput } from "flowbite-react";
 import OAuth from "../components/OAuth";
+import { BASE_URL } from "../config";
 
 export default function Signup() {
   const [formData, setFormData] = useState({});
@@ -26,7 +27,7 @@ const navigate = useNavigate();
       setLoading(true);
       setErrorMessage(null);
 
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch(BASE_URL + "/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
