@@ -32,13 +32,13 @@ mongoose.connection.on("error", (err) => {
   console.log("Database error:", err);
 });
 
-const __dirname=path.resolve();
+const __dirname = path.resolve();
 
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://mern-blog-theta-lilac.vercel.app"],
     credentials: true,
   })
 );
