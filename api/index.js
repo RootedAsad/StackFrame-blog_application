@@ -1,68 +1,157 @@
-import dns from 'dns';
-dns.setServers(['8.8.8.8', '1.1.1.1']);
+import User from "../models/user.model.js";
+import { errorHandler } from "../utils/error.js";
+import bcryptjs from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
-import cors from "cors";
+export const signup = async (req, res, next) => {
+  const { username, email, password } = req.body;
 
-import userRoutes from "./routes/user.route.js";
-import authRoutes from "./routes/auth.route.js";
-import postRoutes from "./routes/post.route.js";
-import commentRoutes from "./routes/comment.route.js";
-import uploadRoute from "./routes/upload.route.js";
-import path from 'path';
-dotenv.config();
+  if (!username || !email || !password || username === "" || email === "" || password === "") {
+    return next(errorHandler(400, "All fields are required"));
+  }
 
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log("MongoDB connected successfully");
-  })
-  .catch((err) => {
-    console.log("Mongo connection error:", err);
+  if (password.length < 6) {
+    return next(errorHandler(400, "Password must be at least 6 characters"));
+  }
+
+  if (username.length < 7 || username.length > 20) {
+    return next(errorHandler(400, "Username must be between 7 and 20 characters"));
+  }
+
+  if (username.includes(" ")) {
+    return next(errorHandler(400, "Username cannot contain spaces"));
+  }
+
+  if (username !== username.toLowerCase()) {
+    return next(errorHandler(400, "Username must be lowercase"));
+  }
+
+  if (!username.match(/^[a-zA-Z0-9]+$/)) {
+    return next(errorHandler(400, "Username can only contain letters and numbers"));
+  }
+
+  const hashedPassword = bcryptjs.hashSync(password, 10);
+
+  const newUser = new User({
+    username: username.toLowerCase(),
+    email,
+    password: hashedPassword,
   });
 
-mongoose.connection.on("connected", () => {
-  console.log("Database connected");
-});
+  try {
+    await newUser.save();
+    res.status(201).json({ message: "Signup successful" });
+  } catch (error) {
+    next(error);
+  }
+};
 
-mongoose.connection.on("error", (err) => {
-  console.log("Database error:", err);
-});
+export const signin = async (req, res, next) => {
+  const { email, password } = req.body;
 
-const __dirname = path.resolve();
+  if (!email || !password || email === "" || password === "") {
+    return next(errorHandler(400, "All fields are required"));
+  }
 
-const app = express();
+  try {
+    const validUser = await User.findOne({ email });
 
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://mern-blog-theta-lilac.vercel.app"],
-    credentials: true,
-  })
-);
-app.use(express.json());
-app.use(cookieParser());
+    if (!validUser) {
+      return next(errorHandler(404, "User not found"));
+    }
 
-app.use("/api/user", userRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/post", postRoutes);
-app.use("/api/comment", commentRoutes);
-app.use("/api/upload", uploadRoute);
+    const validPassword = bcryptjs.compareSync(password, validUser.password);
 
+    if (!validPassword) {
+      return next(errorHandler(400, "Invalid password"));
+    }
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.log(err);
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
-    success: false,
-    statusCode,
-    message: err.message || "Internal server error",
-  });
-});
+    const token = jwt.sign(
+      { id: validUser._id, isAdmin: validUser.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }  // ✅ 30 din
+    );
 
-app.listen(5000, () => {
-  console.log("Server is running on port 5000");
-});
+    const { password: pass, ...rest } = validUser._doc;
+
+    res
+      .status(200)
+      .cookie("access_token", token, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: 30 * 24 * 60 * 60 * 1000,  // ✅ 30 din
+      })
+      .json(rest);
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const google = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (user) {
+      const token = jwt.sign(
+        { id: user._id, isAdmin: user.isAdmin },
+        process.env.JWT_SECRET,
+        { expiresIn: "30d" }  // ✅ 30 din
+      );
+
+      const { password, ...rest } = user._doc;
+
+      res
+        .status(200)
+        .cookie("access_token", token, {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+          maxAge: 30 * 24 * 60 * 60 * 1000,  // ✅ 30 din
+        })
+        .json(rest);
+
+    } else {
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+
+      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+
+      const newUser = new User({
+        username:
+          req.body.name.split(" ").join("").toLowerCase() +
+          Math.random().toString(9).slice(-4),
+        email: req.body.email,
+        password: hashedPassword,
+        profilePicture:
+          req.body.photo ||
+          "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+      });
+
+      await newUser.save();
+
+      const token = jwt.sign(
+        { id: newUser._id, isAdmin: newUser.isAdmin },
+        process.env.JWT_SECRET,
+        { expiresIn: "30d" }  // ✅ 30 din
+      );
+
+      const { password, ...rest } = newUser._doc;
+
+      res
+        .status(200)
+        .cookie("access_token", token, {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+          maxAge: 30 * 24 * 60 * 60 * 1000,  // ✅ 30 din
+        })
+        .json(rest);
+    }
+
+  } catch (error) {
+    next(error);
+  }
+};
