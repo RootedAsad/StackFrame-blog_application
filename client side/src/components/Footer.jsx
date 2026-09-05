@@ -8,14 +8,10 @@ import {
   BsDribbble,
 } from "react-icons/bs";
 
+import stackframeLogo from "../assests/stackframe-logo.png";
+
 export default function CustomFooter() {
   const year = new Date().getFullYear();
-
-  const socialButtonClass =
-    "group flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:border-teal-400 dark:border-gray-700 dark:bg-white/5 motion-reduce:transform-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-2";
-
-  const footerLinkClass =
-    "inline-block rounded-sm text-sm text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:text-teal-600 motion-reduce:transform-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-2 dark:text-gray-400 dark:hover:text-teal-400";
 
   return (
     <footer
@@ -24,7 +20,7 @@ export default function CustomFooter() {
         borderColor: "var(--border-color, #d7ede8)",
       }}
     >
-      {/* Light mode background */}
+      {/* Light mode surface */}
       <div
         className="absolute inset-0 dark:hidden"
         style={{
@@ -34,7 +30,7 @@ export default function CustomFooter() {
         aria-hidden="true"
       />
 
-      {/* Dark mode background */}
+      {/* Dark mode surface */}
       <div
         className="absolute inset-0 hidden dark:block"
         style={{
@@ -45,41 +41,33 @@ export default function CustomFooter() {
 
       {/* Subtle decorative glow */}
       <div
-        className="pointer-events-none absolute -right-24 -top-28 h-64 w-64 rounded-full opacity-25 dark:opacity-10"
+        className="pointer-events-none absolute -top-24 right-10 h-72 w-72 rounded-full opacity-30 dark:opacity-10"
         style={{
           background:
-            "radial-gradient(circle, rgba(45,212,191,0.24) 0%, rgba(45,212,191,0) 70%)",
+            "radial-gradient(circle, rgba(45,212,191,0.25) 0%, rgba(45,212,191,0) 70%)",
         }}
         aria-hidden="true"
       />
 
-      {/* Compact footer container */}
-      <div className="relative mx-auto w-full max-w-[1280px] px-6 pb-7 pt-10 sm:px-8 sm:pb-8 sm:pt-12 lg:px-10">
-        {/* Main content */}
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)] md:items-start md:gap-14 lg:gap-20">
-          {/* Brand */}
-          <div className="max-w-[420px]">
+      <div className="relative mx-auto w-full max-w-7xl px-6 py-14 sm:px-10 sm:py-20">
+        {/* Top Section */}
+        <div className="flex flex-col justify-between gap-12 md:flex-row">
+          {/* Brand + description */}
+          <div className="max-w-[400px]">
             <Link
               to="/"
-              aria-label="ASAD Journal Home"
-              className="inline-flex items-baseline gap-2 whitespace-nowrap"
+              className="inline-flex items-center rounded-full transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+              aria-label="STACKFRAME Home"
             >
-              <span className="rounded-md bg-teal-500 px-2.5 py-1 text-sm font-bold tracking-wide text-white">
-                ASAD
-              </span>
-
-              <span
-                className="text-2xl text-gray-800 dark:text-gray-100 sm:text-3xl"
-                style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                }}
-              >
-                Journal<span className="text-teal-500">.</span>
-              </span>
+              <img
+                src={stackframeLogo}
+                alt="STACKFRAME"
+                className="h-10 w-auto object-contain sm:h-11"
+              />
             </Link>
 
             <p
-              className="mt-3 max-w-[400px] text-sm leading-[1.65] text-gray-500 dark:text-gray-400 sm:text-[15px]"
+              className="mt-5 text-sm leading-[1.7] text-gray-500 dark:text-gray-400 sm:text-base"
               style={{
                 fontFamily: "'Manrope', sans-serif",
               }}
@@ -89,11 +77,11 @@ export default function CustomFooter() {
             </p>
 
             {/* Social icons */}
-            <div className="mt-5 flex items-center gap-3">
+            <div className="mt-7 flex gap-3">
               <a
                 href="#"
                 aria-label="Facebook"
-                className={socialButtonClass}
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:border-teal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-white/5"
               >
                 <BsFacebook className="text-gray-500 transition-colors duration-200 group-hover:text-teal-500 dark:text-gray-400" />
               </a>
@@ -101,7 +89,7 @@ export default function CustomFooter() {
               <a
                 href="#"
                 aria-label="Instagram"
-                className={socialButtonClass}
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:border-teal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-white/5"
               >
                 <BsInstagram className="text-gray-500 transition-colors duration-200 group-hover:text-teal-500 dark:text-gray-400" />
               </a>
@@ -109,7 +97,7 @@ export default function CustomFooter() {
               <a
                 href="#"
                 aria-label="Twitter"
-                className={socialButtonClass}
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:border-teal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-white/5"
               >
                 <BsTwitter className="text-gray-500 transition-colors duration-200 group-hover:text-teal-500 dark:text-gray-400" />
               </a>
@@ -119,7 +107,7 @@ export default function CustomFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
-                className={socialButtonClass}
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:border-teal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-white/5"
               >
                 <BsGithub className="text-gray-500 transition-colors duration-200 group-hover:text-teal-500 dark:text-gray-400" />
               </a>
@@ -127,19 +115,19 @@ export default function CustomFooter() {
               <a
                 href="#"
                 aria-label="Dribbble"
-                className={socialButtonClass}
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:border-teal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-white/5"
               >
                 <BsDribbble className="text-gray-500 transition-colors duration-200 group-hover:text-teal-500 dark:text-gray-400" />
               </a>
             </div>
           </div>
 
-          {/* Footer navigation */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 sm:gap-x-10 lg:gap-x-14">
+          {/* Link groups */}
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 sm:gap-16">
             {/* About */}
             <nav aria-label="About links">
               <h3
-                className="mb-3 text-sm font-semibold uppercase tracking-[0.04em] text-gray-800 dark:text-gray-200"
+                className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-800 dark:text-gray-200"
                 style={{
                   fontFamily: "'Manrope', sans-serif",
                 }}
@@ -148,34 +136,38 @@ export default function CustomFooter() {
               </h3>
 
               <ul
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-3 text-sm"
                 style={{
                   fontFamily: "'Manrope', sans-serif",
                 }}
               >
+                {/* Portfolio replaces 100 JS Projects */}
                 <li>
                   <a
-                    href="https://www.100jsprojects.com"
+                    href="https://asad-portfolio-tau.vercel.app/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={footerLinkClass}
+                    className="relative inline-block rounded-sm text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:text-gray-400 dark:hover:text-teal-400"
                   >
-                    100 JS Projects
+                    Portfolio
                   </a>
                 </li>
 
                 <li>
-                  <Link to="/" className={footerLinkClass}>
-                    Asad's Blog
+                  <Link
+                    to="/"
+                    className="relative inline-block rounded-sm text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:text-gray-400 dark:hover:text-teal-400"
+                  >
+                    STACKFRAME
                   </Link>
                 </li>
               </ul>
             </nav>
 
-            {/* Follow Us */}
+            {/* Follow */}
             <nav aria-label="Follow links">
               <h3
-                className="mb-3 text-sm font-semibold uppercase tracking-[0.04em] text-gray-800 dark:text-gray-200"
+                className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-800 dark:text-gray-200"
                 style={{
                   fontFamily: "'Manrope', sans-serif",
                 }}
@@ -184,7 +176,7 @@ export default function CustomFooter() {
               </h3>
 
               <ul
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-3 text-sm"
                 style={{
                   fontFamily: "'Manrope', sans-serif",
                 }}
@@ -194,7 +186,7 @@ export default function CustomFooter() {
                     href="https://github.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={footerLinkClass}
+                    className="relative inline-block rounded-sm text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:text-gray-400 dark:hover:text-teal-400"
                   >
                     Github
                   </a>
@@ -205,7 +197,7 @@ export default function CustomFooter() {
                     href="https://discord.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={footerLinkClass}
+                    className="relative inline-block rounded-sm text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:text-gray-400 dark:hover:text-teal-400"
                   >
                     Discord
                   </a>
@@ -216,7 +208,7 @@ export default function CustomFooter() {
             {/* Legal */}
             <nav aria-label="Legal links">
               <h3
-                className="mb-3 text-sm font-semibold uppercase tracking-[0.04em] text-gray-800 dark:text-gray-200"
+                className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-800 dark:text-gray-200"
                 style={{
                   fontFamily: "'Manrope', sans-serif",
                 }}
@@ -225,19 +217,25 @@ export default function CustomFooter() {
               </h3>
 
               <ul
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-3 text-sm"
                 style={{
                   fontFamily: "'Manrope', sans-serif",
                 }}
               >
                 <li>
-                  <a href="#" className={footerLinkClass}>
+                  <a
+                    href="#"
+                    className="relative inline-block rounded-sm text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:text-gray-400 dark:hover:text-teal-400"
+                  >
                     Privacy Policy
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className={footerLinkClass}>
+                  <a
+                    href="#"
+                    className="relative inline-block rounded-sm text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:text-gray-400 dark:hover:text-teal-400"
+                  >
                     Terms &amp; Conditions
                   </a>
                 </li>
@@ -246,32 +244,30 @@ export default function CustomFooter() {
           </div>
         </div>
 
-        {/* Bottom divider */}
+        {/* Bottom bar */}
         <div
-          className="mt-9 border-t pt-4 sm:mt-10 sm:pt-5"
+          className="mt-14 flex flex-col items-center justify-between gap-3 border-t pt-6 text-center sm:flex-row sm:text-left"
           style={{
             borderColor: "var(--border-color, #d7ede8)",
           }}
         >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p
-              className="text-sm text-gray-500 dark:text-gray-400"
-              style={{
-                fontFamily: "'Manrope', sans-serif",
-              }}
-            >
-              &copy; {year} Asad Journal. All rights reserved.
-            </p>
+          <p
+            className="text-sm text-gray-500 dark:text-gray-400"
+            style={{
+              fontFamily: "'Manrope', sans-serif",
+            }}
+          >
+            &copy; {year} STACKFRAME. All rights reserved.
+          </p>
 
-            <p
-              className="text-sm text-gray-400 dark:text-gray-500"
-              style={{
-                fontFamily: "'Manrope', sans-serif",
-              }}
-            >
-              Built with care, one post at a time.
-            </p>
-          </div>
+          <p
+            className="text-sm text-gray-400 dark:text-gray-500"
+            style={{
+              fontFamily: "'Manrope', sans-serif",
+            }}
+          >
+            Built with care, one post at a time.
+          </p>
         </div>
       </div>
     </footer>

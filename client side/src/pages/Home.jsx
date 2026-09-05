@@ -299,7 +299,7 @@ export default function Home() {
                   ...entranceStyle(180),
                 }}
               >
-                Welcome to Asad's Blog
+                Welcome to STACKFRAME
               </h1>
 
               {/* Description */}

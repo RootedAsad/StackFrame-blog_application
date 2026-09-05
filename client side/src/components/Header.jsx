@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/themeSlice";
 import { signOutSuccess } from "../redux/user/userSlice";
 import { BASE_URL } from "../config";
+import stackframeLogo from "../assests/stackframe-logo.png";
 
 export default function Header() {
   const location = useLocation();
@@ -151,34 +152,21 @@ export default function Header() {
             WebkitBackdropFilter: isScrolled ? "blur(18px)" : "blur(12px)",
           }}
         >
-          {/* BRANDING: [ ASAD ] Journal. */}
+          {/* STACKFRAME BRANDING */}
           <Link
             to="/"
-            className="group flex shrink-0 items-center gap-2 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal-500)] focus-visible:ring-offset-2 rounded-full"
-            aria-label="ASAD Journal Home"
+            className="group flex shrink-0 items-center select-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal-500)] focus-visible:ring-offset-2"
+            aria-label="STACKFRAME Home"
           >
-            <span
-              className={`inline-flex items-center justify-center font-bold tracking-wider uppercase rounded-full text-white bg-gradient-to-br from-[var(--teal-700)] to-[var(--teal-900)] dark:from-[var(--accent)] dark:to-[var(--teal-700)] dark:text-[#0a0f0f] shadow-sm transition-all duration-200 ease-out group-hover:scale-[1.02] group-hover:-translate-y-0.5 ${
-                isScrolled ? "text-[10px] px-2 py-1" : "text-[11px] px-2.5 py-1.5"
+            <img
+              src={stackframeLogo}
+              alt="STACKFRAME"
+              className={`w-auto object-contain transition-all duration-200 ease-out group-hover:scale-[1.02] group-hover:-translate-y-0.5 ${
+                isScrolled
+                  ? "h-8 sm:h-9"
+                  : "h-9 sm:h-10"
               }`}
-            >
-              ASAD
-            </span>
-
-            <span
-              className={`font-semibold tracking-tight transition-all duration-200 ${
-                isScrolled ? "text-base sm:text-lg" : "text-lg sm:text-xl"
-              }`}
-              style={{
-                fontFamily: "var(--font-display)",
-                color: "var(--text)",
-              }}
-            >
-              Journal
-              <span className="text-[var(--teal-500)] dark:text-[var(--accent)] font-bold ml-0.5">
-                .
-              </span>
-            </span>
+            />
           </Link>
 
           {/* CENTER GROUP: search + nav links, centered between logo and right actions */}
