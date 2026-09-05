@@ -1,191 +1,230 @@
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import {
+  HiAnnotation,
+  HiArrowNarrowUp,
+  HiDocumentText,
+  HiOutlineUserGroup,
+} from 'react-icons/hi';
+import { Button, Table } from 'flowbite-react';
+import { Link } from 'react-router-dom';
 
-export default function DashComments() {
+export default function DashboardComp() {
+  const [users, setUsers] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [totalComments, setTotalComments] = useState(0);
+  const [lastMonthUsers, setLastMonthUsers] = useState(0);
+  const [lastMonthPosts, setLastMonthPosts] = useState(0);
+  const [lastMonthComments, setLastMonthComments] = useState(0);
+
   const { currentUser } = useSelector((state) => state.user);
 
-  const [comments, setComments] = useState([]);
-  const [showMore, setShowMore] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [commentIdToDelete, setCommentIdToDelete] = useState("");
-
-  // Fetch all comments — only for admin users
   useEffect(() => {
-    const fetchComments = async () => {
+    const fetchUsers = async () => {
       try {
-        const res = await fetch("/api/comment/getcomments", {
-          credentials: "include",
-        });
+        const res = await fetch('/api/user/getusers?limit=5');
         const data = await res.json();
-
         if (res.ok) {
-          setComments(data.comments);
-          // Hide "show more" if less than 9 comments returned
-          if (data.comments.length < 9) setShowMore(false);
+          setUsers(data.users);
+          setTotalUsers(data.totalUsers);
+          setLastMonthUsers(data.lastMonthUsers);
         }
       } catch (error) {
         console.log(error.message);
       }
     };
 
-    if (currentUser.isAdmin) {
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch('/api/post/getposts?limit=5');
+        const data = await res.json();
+        if (res.ok) {
+          setPosts(data.posts);
+          setTotalPosts(data.totalPosts);
+          setLastMonthPosts(data.lastMonthPosts);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    const fetchComments = async () => {
+      try {
+        const res = await fetch('/api/comment/getcomments?limit=5');
+        const data = await res.json();
+        if (res.ok) {
+          setComments(data.comments);
+          setTotalComments(data.totalComments);
+          setLastMonthComments(data.lastMonthComments);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    // Sirf admin ke liye data fetch karte hain
+    if (currentUser?.isAdmin) {
+      fetchUsers();
+      fetchPosts();
       fetchComments();
     }
-  }, [currentUser._id]);
-
-  // Load more comments starting from current list length
-  const handleShowMore = async () => {
-    const startIndex = comments.length;
-    try {
-      const res = await fetch(
-        `/api/comment/getcomments?startIndex=${startIndex}`,
-        { credentials: "include" }
-      );
-      const data = await res.json();
-
-      if (res.ok) {
-        // Append new comments to existing list
-        setComments((prev) => [...prev, ...data.comments]);
-        if (data.comments.length < 9) setShowMore(false);
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  // Delete comment after confirmation
-  const handleDeleteComment = async () => {
-    try {
-      const res = await fetch(
-        `/api/comment/deleteComment/${commentIdToDelete}`,
-        { method: "DELETE", credentials: "include" }
-      );
-      const data = await res.json();
-
-      if (res.ok) {
-        // Remove deleted comment from local state
-        setComments((prev) =>
-          prev.filter((comment) => comment._id !== commentIdToDelete)
-        );
-        setShowModal(false);
-      } else {
-        console.log(data.message);
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
+  }, [currentUser]);
 
   return (
-    <div className="w-full overflow-x-auto p-4">
-      {currentUser.isAdmin && comments.length > 0 ? (
-        <>
-          <table className="w-full min-w-[1000px] border-collapse table-fixed">
-
-            {/* Table headers */}
-            <thead className="border-b text-[11px] uppercase text-gray-500">
-              <tr>
-                <th className="px-4 py-3 text-left">DATE UPDATED</th>
-                <th className="px-4 py-3 text-left">COMMENT CONTENT</th>
-                <th className="px-4 py-3 text-left">NUMBER OF LIKES</th>
-                <th className="px-4 py-3 text-left">POST ID</th>
-                <th className="px-4 py-3 text-left">USER ID</th>
-                <th className="px-4 py-3 text-left">DELETE</th>
-              </tr>
-            </thead>
-
-            {/* Table rows — one per comment */}
-            <tbody>
-              {comments.map((comment) => (
-                <tr
-                  key={comment._id}
-                  className="border-b hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                >
-                  {/* Last updated date */}
-                  <td className="px-4 py-4 text-sm text-gray-500 align-middle">
-                    {new Date(comment.updatedAt).toLocaleDateString()}
-                  </td>
-
-                  {/* Comment text content */}
-                  <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-200 align-middle">
-                    {comment.content}
-                  </td>
-
-                  {/* Total likes count */}
-                  <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-200 align-middle">
-                    {comment.numberOfLikes}
-                  </td>
-
-                  {/* Post this comment belongs to */}
-                  <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-200 align-middle">
-                    {comment.postId}
-                  </td>
-
-                  {/* User who wrote the comment */}
-                  <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-200 align-middle">
-                    {comment.userId}
-                  </td>
-
-                  {/* Delete button — opens confirmation modal */}
-                  <td className="px-4 py-4 align-middle">
-                    <button
-                      onClick={() => {
-                        setShowModal(true);
-                        setCommentIdToDelete(comment._id);
-                      }}
-                      className="text-red-500 hover:text-red-700 text-sm cursor-pointer"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Load more comments button */}
-          {showMore && (
-            <button
-              onClick={handleShowMore}
-              className="w-full text-teal-500 text-sm py-7 cursor-pointer hover:underline"
-            >
-              Show more
-            </button>
-          )}
-        </>
-      ) : (
-        // Empty state
-        <p className="text-center py-10 text-gray-500">
-          You have no comments yet
-        </p>
-      )}
-
-      {/* Delete confirmation modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full text-center">
-            <HiOutlineExclamationCircle className="text-gray-400 text-6xl mx-auto mb-4" />
-            <h3 className="mb-5 text-lg text-gray-500">
-              Are you sure you want to delete this comment?
-            </h3>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={handleDeleteComment}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              >
-                Yes, I'm sure
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
-              >
-                No, cancel
-              </button>
+    <div className='p-3 md:mx-auto'>
+      {/* 1. Top Analytics Cards */}
+      <div className='flex-wrap flex gap-4 justify-center'>
+        {/* Total Users Card */}
+        <div className='flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md'>
+          <div className='flex justify-between'>
+            <div>
+              <h3 className='text-gray-500 text-md uppercase'>Total Users</h3>
+              <p className='text-2xl'>{totalUsers}</p>
             </div>
+            <HiOutlineUserGroup className='bg-teal-600 text-white rounded-full text-5xl p-3 shadow-lg' />
+          </div>
+          <div className='flex gap-2 text-sm'>
+            <span className='text-green-500 flex items-center'>
+              <HiArrowNarrowUp />
+              {lastMonthUsers}
+            </span>
+            <div className='text-gray-500'>Last month</div>
           </div>
         </div>
-      )}
+
+        {/* Total Comments Card */}
+        <div className='flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md'>
+          <div className='flex justify-between'>
+            <div>
+              <h3 className='text-gray-500 text-md uppercase'>Total Comments</h3>
+              <p className='text-2xl'>{totalComments}</p>
+            </div>
+            <HiAnnotation className='bg-indigo-600 text-white rounded-full text-5xl p-3 shadow-lg' />
+          </div>
+          <div className='flex gap-2 text-sm'>
+            <span className='text-green-500 flex items-center'>
+              <HiArrowNarrowUp />
+              {lastMonthComments}
+            </span>
+            <div className='text-gray-500'>Last month</div>
+          </div>
+        </div>
+
+        {/* Total Posts Card */}
+        <div className='flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md'>
+          <div className='flex justify-between'>
+            <div>
+              <h3 className='text-gray-500 text-md uppercase'>Total Posts</h3>
+              <p className='text-2xl'>{totalPosts}</p>
+            </div>
+            <HiDocumentText className='bg-lime-600 text-white rounded-full text-5xl p-3 shadow-lg' />
+          </div>
+          <div className='flex gap-2 text-sm'>
+            <span className='text-green-500 flex items-center'>
+              <HiArrowNarrowUp />
+              {lastMonthPosts}
+            </span>
+            <div className='text-gray-500'>Last month</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Recent Tables Section */}
+      <div className='flex flex-wrap gap-4 py-3 mx-auto justify-center'>
+        {/* Recent Users Table */}
+        <div className='flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800'>
+          <div className='flex justify-between p-3 text-sm font-semibold'>
+            <h1 className='text-center p-2'>Recent users</h1>
+            <Button outline gradientDuoTone='purpleToPink'>
+              <Link to={'/dashboard?tab=users'}>See all</Link>
+            </Button>
+          </div>
+          <Table hoverable>
+            <Table.Head>
+              <Table.HeadCell>User image</Table.HeadCell>
+              <Table.HeadCell>Username</Table.HeadCell>
+            </Table.Head>
+            <Table.Body className='divide-y'>
+              {users &&
+                users.map((user) => (
+                  <Table.Row key={user._id} className='bg-white dark:border-gray-700 dark:bg-gray-800'>
+                    <Table.Cell>
+                      <img
+                        src={user.profilePicture}
+                        alt='user'
+                        className='w-10 h-10 rounded-full bg-gray-500 object-cover'
+                      />
+                    </Table.Cell>
+                    <Table.Cell>{user.username}</Table.Cell>
+                  </Table.Row>
+                ))}
+            </Table.Body>
+          </Table>
+        </div>
+
+        {/* Recent Comments Table */}
+        <div className='flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800'>
+          <div className='flex justify-between p-3 text-sm font-semibold'>
+            <h1 className='text-center p-2'>Recent comments</h1>
+            <Button outline gradientDuoTone='purpleToPink'>
+              <Link to={'/dashboard?tab=comments'}>See all</Link>
+            </Button>
+          </div>
+          <Table hoverable>
+            <Table.Head>
+              <Table.HeadCell>Comment content</Table.HeadCell>
+              <Table.HeadCell>Likes</Table.HeadCell>
+            </Table.Head>
+            <Table.Body className='divide-y'>
+              {comments &&
+                comments.map((comment) => (
+                  <Table.Row key={comment._id} className='bg-white dark:border-gray-700 dark:bg-gray-800'>
+                    <Table.Cell className='w-96'>
+                      <p className='line-clamp-2'>{comment.content}</p>
+                    </Table.Cell>
+                    <Table.Cell>{comment.numberOfLikes}</Table.Cell>
+                  </Table.Row>
+                ))}
+            </Table.Body>
+          </Table>
+        </div>
+
+        {/* Recent Posts Table */}
+        <div className='flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800'>
+          <div className='flex justify-between p-3 text-sm font-semibold'>
+            <h1 className='text-center p-2'>Recent posts</h1>
+            <Button outline gradientDuoTone='purpleToPink'>
+              <Link to={'/dashboard?tab=posts'}>See all</Link>
+            </Button>
+          </div>
+          <Table hoverable>
+            <Table.Head>
+              <Table.HeadCell>Post image</Table.HeadCell>
+              <Table.HeadCell>Post Title</Table.HeadCell>
+              <Table.HeadCell>Category</Table.HeadCell>
+            </Table.Head>
+            <Table.Body className='divide-y'>
+              {posts &&
+                posts.map((post) => (
+                  <Table.Row key={post._id} className='bg-white dark:border-gray-700 dark:bg-gray-800'>
+                    <Table.Cell>
+                      <img
+                        src={post.image}
+                        alt='post'
+                        className='w-14 h-10 rounded-md bg-gray-500 object-cover'
+                      />
+                    </Table.Cell>
+                    <Table.Cell className='w-96'>{post.title}</Table.Cell>
+                    <Table.Cell className='w-5'>{post.category}</Table.Cell>
+                  </Table.Row>
+                ))}
+            </Table.Body>
+          </Table>
+        </div>
+      </div>
     </div>
   );
 }
