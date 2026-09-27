@@ -15,12 +15,12 @@ export default function CustomFooter() {
 
   return (
     <footer
-      className="relative w-full overflow-hidden border-t"
+      className="relative m-0 w-full overflow-hidden border-t"
       style={{
         borderColor: "var(--border-color, #d7ede8)",
       }}
     >
-      {/* Light mode surface */}
+      {/* Light Mode Background */}
       <div
         className="absolute inset-0 dark:hidden"
         style={{
@@ -30,7 +30,7 @@ export default function CustomFooter() {
         aria-hidden="true"
       />
 
-      {/* Dark mode surface */}
+      {/* Dark Mode Background */}
       <div
         className="absolute inset-0 hidden dark:block"
         style={{
@@ -39,7 +39,7 @@ export default function CustomFooter() {
         aria-hidden="true"
       />
 
-      {/* Subtle decorative glow */}
+      {/* Decorative Glow */}
       <div
         className="pointer-events-none absolute -top-24 right-10 h-72 w-72 rounded-full opacity-30 dark:opacity-10"
         style={{
@@ -49,10 +49,11 @@ export default function CustomFooter() {
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto w-full max-w-7xl px-6 py-14 sm:px-10 sm:py-20">
+      {/* Footer Content */}
+      <div className="relative mx-auto w-full max-w-6xl px-4 pt-3 pb-0 sm:px-6 sm:pt-4 sm:pb-0 lg:px-8">
         {/* Top Section */}
-        <div className="flex flex-col justify-between gap-12 md:flex-row">
-          {/* Brand + description */}
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
+          {/* Brand */}
           <div className="max-w-[400px]">
             <Link
               to="/"
@@ -67,7 +68,7 @@ export default function CustomFooter() {
             </Link>
 
             <p
-              className="mt-5 text-sm leading-[1.7] text-gray-500 dark:text-gray-400 sm:text-base"
+              className="mt-3 text-sm leading-[1.7] text-gray-500 dark:text-gray-400 sm:text-base"
               style={{
                 fontFamily: "'Manrope', sans-serif",
               }}
@@ -76,8 +77,8 @@ export default function CustomFooter() {
               things worth building.
             </p>
 
-            {/* Social icons */}
-            <div className="mt-7 flex gap-3">
+            {/* Social Icons */}
+            <div className="mt-3 flex gap-3">
               <a
                 href="#"
                 aria-label="Facebook"
@@ -122,7 +123,7 @@ export default function CustomFooter() {
             </div>
           </div>
 
-          {/* Link groups */}
+          {/* Link Groups */}
           <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 sm:gap-16">
             {/* About */}
             <nav aria-label="About links">
@@ -141,7 +142,6 @@ export default function CustomFooter() {
                   fontFamily: "'Manrope', sans-serif",
                 }}
               >
-                {/* Portfolio replaces 100 JS Projects */}
                 <li>
                   <a
                     href="https://asad-portfolio-tau.vercel.app/"
@@ -164,7 +164,7 @@ export default function CustomFooter() {
               </ul>
             </nav>
 
-            {/* Follow */}
+            {/* Follow Us */}
             <nav aria-label="Follow links">
               <h3
                 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-800 dark:text-gray-200"
@@ -244,15 +244,15 @@ export default function CustomFooter() {
           </div>
         </div>
 
-        {/* Bottom bar */}
+        {/* Bottom Bar */}
         <div
-          className="mt-14 flex flex-col items-center justify-between gap-3 border-t pt-6 text-center sm:flex-row sm:text-left"
+          className="mt-4 flex flex-col items-center justify-between gap-3 border-t pt-3 pb-0 text-center sm:flex-row sm:text-left"
           style={{
             borderColor: "var(--border-color, #d7ede8)",
           }}
         >
           <p
-            className="text-sm text-gray-500 dark:text-gray-400"
+            className="m-0 p-0 text-sm text-gray-500 dark:text-gray-400"
             style={{
               fontFamily: "'Manrope', sans-serif",
             }}
@@ -261,7 +261,7 @@ export default function CustomFooter() {
           </p>
 
           <p
-            className="text-sm text-gray-400 dark:text-gray-500"
+            className="m-0 p-0 text-sm text-gray-400 dark:text-gray-500"
             style={{
               fontFamily: "'Manrope', sans-serif",
             }}

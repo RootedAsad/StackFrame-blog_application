@@ -13,6 +13,7 @@ import stackframeLogo from "../assests/stackframe-logo.png";
 export default function Header() {
   const location = useLocation();
   const path = location.pathname;
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -20,7 +21,6 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
 
   const userDropdownRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -28,24 +28,30 @@ export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
 
-  // Sync searchTerm from query parameter
+  /* =========================================================
+     SYNC SEARCH WITH URL
+  ========================================================== */
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchTermFromUrl = urlParams.get("searchTerm");
 
-    if (searchTermFromUrl !== null) {
-      setSearchTerm(searchTermFromUrl);
-    }
+    setSearchTerm(searchTermFromUrl || "");
   }, [location.search]);
 
-  // Close menus on route change
+  /* =========================================================
+     CLOSE MENUS ON ROUTE CHANGE
+  ========================================================== */
+
   useEffect(() => {
     setMobileMenuOpen(false);
     setUserMenuOpen(false);
-    setSearchExpanded(false);
   }, [path]);
 
-  // Optimized scroll morph listener
+  /* =========================================================
+     SCROLL EFFECT
+  ========================================================== */
+
   useEffect(() => {
     let ticking = false;
 
@@ -61,12 +67,20 @@ export default function Header() {
     };
 
     handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
-  // Close user dropdown on outside click
+  /* =========================================================
+     CLOSE USER MENU WHEN CLICKING OUTSIDE
+  ========================================================== */
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -79,31 +93,51 @@ export default function Header() {
 
     document.addEventListener("mousedown", handleClickOutside);
 
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  // Focus input when search expands
-  useEffect(() => {
-    if (searchExpanded && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [searchExpanded]);
+  /* =========================================================
+     SEARCH
+  ========================================================== */
 
-  const handleSubmit = (e) => {
+  const handleSearchSubmit = (e) => {
     e.preventDefault();
 
-    const urlParams = new URLSearchParams(location.search);
     const trimmedSearchTerm = searchTerm.trim();
 
-    if (trimmedSearchTerm) {
-      urlParams.set("searchTerm", trimmedSearchTerm);
-    } else {
-      urlParams.delete("searchTerm");
-    }
+    /*
+      Always create a fresh search URL.
 
-    navigate(`/search?${urlParams.toString()}`);
-    setSearchExpanded(false);
+      This prevents old:
+      - category
+      - sort
+      - startIndex
+
+      values from another page/search from being reused.
+    */
+
+    if (trimmedSearchTerm) {
+      navigate(
+        `/search?searchTerm=${encodeURIComponent(trimmedSearchTerm)}`
+      );
+    } else {
+      navigate("/search");
+    }
   };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+
+    if (path === "/search") {
+      navigate("/search");
+    }
+  };
+
+  /* =========================================================
+     SIGN OUT
+  ========================================================== */
 
   const handleSignout = async () => {
     try {
@@ -116,70 +150,194 @@ export default function Header() {
 
       if (!res.ok) {
         console.log(data.message);
-      } else {
-        dispatch(signOutSuccess());
-        setUserMenuOpen(false);
-        navigate("/sign-in");
+        return;
       }
+
+      dispatch(signOutSuccess());
+
+      setUserMenuOpen(false);
+
+      navigate("/sign-in");
     } catch (error) {
       console.log(error.message);
     }
   };
 
-  // Keep only real application routes in the primary navigation.
-  // Search is handled by the dedicated search field.
+  /* =========================================================
+     NAVIGATION
+  ========================================================== */
+
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Projects", href: "/projects" },
+    {
+      name: "Home",
+      href: "/",
+    },
+    {
+      name: "About",
+      href: "/about",
+    },
+    {
+      name: "Projects",
+      href: "/projects",
+    },
   ];
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ease-out ${
-        isScrolled ? "py-1 sm:py-1.5" : "py-3 sm:py-4"
-      }`}
+      className={`
+        sticky
+        top-0
+        z-50
+        w-full
+        transition-all
+        duration-300
+        ease-out
+        ${
+          isScrolled
+            ? "py-1 sm:py-1.5"
+            : "py-3 sm:py-4"
+        }
+      `}
     >
-      <div className="container-editorial w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div
+        className="
+          container-editorial
+          mx-auto
+          w-full
+          max-w-[1400px]
+          px-4
+          sm:px-6
+          lg:px-8
+        "
+      >
         <nav
           aria-label="Main Navigation"
-          className={`relative flex items-center gap-3 sm:gap-4 rounded-full border transition-all duration-300 ${
-            isScrolled
-              ? "bg-[rgba(255,255,255,0.92)] dark:bg-[rgba(19,28,28,0.92)] shadow-md border-[var(--line)] py-1.5 px-4 sm:px-5 backdrop-blur-xl scale-[0.97]"
-              : "bg-[rgba(255,255,255,0.72)] dark:bg-[rgba(19,28,28,0.72)] shadow-sm border-[var(--line)] py-2.5 px-4 sm:px-5 backdrop-blur-md scale-100"
-          }`}
+          className={`
+            relative
+            flex
+            items-center
+            gap-3
+            rounded-full
+            border
+            transition-all
+            duration-300
+            sm:gap-4
+            ${
+              isScrolled
+                ? `
+                  border-[var(--line)]
+                  bg-[rgba(255,255,255,0.92)]
+                  px-4
+                  py-1.5
+                  shadow-md
+                  backdrop-blur-xl
+                  sm:px-5
+                  dark:bg-[rgba(19,28,28,0.92)]
+                  scale-[0.97]
+                `
+                : `
+                  border-[var(--line)]
+                  bg-[rgba(255,255,255,0.72)]
+                  px-4
+                  py-2.5
+                  shadow-sm
+                  backdrop-blur-md
+                  sm:px-5
+                  dark:bg-[rgba(19,28,28,0.72)]
+                  scale-100
+                `
+            }
+          `}
           style={{
-            WebkitBackdropFilter: isScrolled ? "blur(18px)" : "blur(12px)",
+            WebkitBackdropFilter: isScrolled
+              ? "blur(18px)"
+              : "blur(12px)",
           }}
         >
-          {/* STACKFRAME BRANDING */}
+          {/* =====================================================
+              LOGO
+          ====================================================== */}
+
           <Link
             to="/"
-            className="group flex shrink-0 items-center select-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal-500)] focus-visible:ring-offset-2"
+            className="
+              group
+              flex
+              shrink-0
+              select-none
+              items-center
+              rounded-full
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[var(--teal-500)]
+              focus-visible:ring-offset-2
+            "
             aria-label="STACKFRAME Home"
           >
             <img
               src={stackframeLogo}
               alt="STACKFRAME"
-              className={`w-auto object-contain transition-all duration-200 ease-out group-hover:scale-[1.02] group-hover:-translate-y-0.5 ${
-                isScrolled
-                  ? "h-8 sm:h-9"
-                  : "h-9 sm:h-10"
-              }`}
+              className={`
+                w-auto
+                object-contain
+                transition-all
+                duration-200
+                ease-out
+                group-hover:-translate-y-0.5
+                group-hover:scale-[1.02]
+                ${
+                  isScrolled
+                    ? "h-8 sm:h-9"
+                    : "h-9 sm:h-10"
+                }
+              `}
             />
           </Link>
 
-          {/* CENTER GROUP: search + nav links, centered between logo and right actions */}
-          <div className="hidden sm:flex flex-1 items-center justify-center gap-6 lg:gap-10 min-w-0">
-            {/* DESKTOP SEARCH */}
+          {/* =====================================================
+              CENTER
+          ====================================================== */}
+
+          <div
+            className="
+              hidden
+              min-w-0
+              flex-1
+              items-center
+              justify-center
+              gap-6
+              sm:flex
+              lg:gap-10
+            "
+          >
+            {/* ===================================================
+                DESKTOP SEARCH
+            ==================================================== */}
+
             <form
-              onSubmit={handleSubmit}
-              className="relative shrink-0 flex items-center w-full max-w-[260px] lg:max-w-[300px]"
+              onSubmit={handleSearchSubmit}
               role="search"
+              className="
+                relative
+                flex
+                w-full
+                max-w-[260px]
+                shrink-0
+                items-center
+                lg:max-w-[300px]
+              "
             >
               <AiOutlineSearch
                 aria-hidden="true"
-                className="pointer-events-none absolute left-4 w-4 h-4 text-[var(--teal-700)] dark:text-[var(--accent)]"
+                className="
+                  pointer-events-none
+                  absolute
+                  left-4
+                  h-4
+                  w-4
+                  text-[var(--teal-700)]
+                  dark:text-[var(--accent)]
+                "
               />
 
               <input
@@ -189,43 +347,116 @@ export default function Header() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 aria-label="Search articles"
-                className="w-full text-sm py-2.5 pl-11 pr-10 rounded-full border-2 border-[rgba(20,184,166,0.25)] bg-[rgba(255,255,255,0.78)] dark:bg-[rgba(19,28,28,0.78)] text-[var(--text)] placeholder:text-[var(--text-muted)] shadow-sm outline-none focus:border-[var(--teal-500)] focus:ring-2 focus:ring-[rgba(20,184,166,0.12)] transition-all duration-200"
+                autoComplete="off"
+                className="
+                  w-full
+                  rounded-full
+                  border-2
+                  border-[rgba(20,184,166,0.25)]
+                  bg-[rgba(255,255,255,0.78)]
+                  py-2.5
+                  pl-11
+                  pr-10
+                  text-sm
+                  text-[var(--text)]
+                  shadow-sm
+                  outline-none
+                  transition-all
+                  duration-200
+                  placeholder:text-[var(--text-muted)]
+                  focus:border-[var(--teal-500)]
+                  focus:ring-2
+                  focus:ring-[rgba(20,184,166,0.12)]
+                  dark:bg-[rgba(19,28,28,0.78)]
+                "
               />
 
+              {/* Clear Search */}
               {searchTerm && (
                 <button
                   type="button"
-                  onClick={() => setSearchTerm("")}
+                  onClick={clearSearch}
                   aria-label="Clear search"
-                  className="absolute right-3.5 inline-flex items-center justify-center text-[var(--teal-700)] dark:text-[var(--accent)] hover:text-[var(--text)] transition-colors duration-150"
+                  className="
+                    absolute
+                    right-3.5
+                    inline-flex
+                    items-center
+                    justify-center
+                    text-[var(--teal-700)]
+                    transition-colors
+                    duration-150
+                    hover:text-[var(--text)]
+                    dark:text-[var(--accent)]
+                  "
                 >
-                  <AiOutlineClose className="w-4 h-4" />
+                  <AiOutlineClose className="h-4 w-4" />
                 </button>
               )}
             </form>
 
-            {/* DESKTOP NAV LINKS */}
-            <div className="hidden md:flex items-center gap-1 lg:gap-1.5 shrink-0">
+            {/* ===================================================
+                DESKTOP NAVIGATION
+            ==================================================== */}
+
+            <div
+              className="
+                hidden
+                shrink-0
+                items-center
+                gap-1
+                md:flex
+                lg:gap-1.5
+              "
+            >
               {navLinks.map((link) => {
                 const isActive =
                   link.href === "/"
                     ? path === "/"
-                    : path === link.href || path.startsWith(`${link.href}/`);
+                    : path === link.href ||
+                      path.startsWith(`${link.href}/`);
 
                 return (
                   <Link
                     key={link.name}
                     to={link.href}
-                    className={`group relative px-4 py-2 rounded-full text-sm tracking-normal font-medium transition-all duration-200 ease-out hover:-translate-y-0.5 ${
-                      isActive
-                        ? "text-[var(--teal-900)] dark:text-[var(--accent)] font-semibold bg-[rgba(20,184,166,0.12)]"
-                        : "text-[var(--text-muted)] hover:text-[var(--teal-700)] dark:hover:text-[var(--accent)] hover:bg-[rgba(20,184,166,0.12)] dark:hover:bg-[rgba(20,184,166,0.16)]"
-                    }`}
+                    className={`
+                      group
+                      relative
+                      rounded-full
+                      px-4
+                      py-2
+                      text-sm
+                      font-medium
+                      tracking-normal
+                      transition-all
+                      duration-200
+                      ease-out
+                      hover:-translate-y-0.5
+                      ${
+                        isActive
+                          ? `
+                            bg-[rgba(20,184,166,0.12)]
+                            font-semibold
+                            text-[var(--teal-900)]
+                            dark:text-[var(--accent)]
+                          `
+                          : `
+                            text-[var(--text-muted)]
+                            hover:bg-[rgba(20,184,166,0.12)]
+                            hover:text-[var(--teal-700)]
+                            dark:hover:bg-[rgba(20,184,166,0.16)]
+                            dark:hover:text-[var(--accent)]
+                          `
+                      }
+                    `}
                   >
-                    {/* Text flip effect: current label slides up, colored duplicate slides in */}
                     <span className="relative inline-block h-5 overflow-hidden align-middle">
                       <span className="flex flex-col transition-transform duration-300 ease-out group-hover:-translate-y-1/2">
-                        <span className="block leading-5">{link.name}</span>
+                        <span className="block leading-5">
+                          {link.name}
+                        </span>
+
                         <span className="block leading-5 text-[var(--teal-500)] dark:text-[var(--accent)]">
                           {link.name}
                         </span>
@@ -237,73 +468,197 @@ export default function Header() {
             </div>
           </div>
 
-          {/* RIGHT ACTIONS */}
-          <div className="ml-auto flex shrink-0 items-center gap-2.5 lg:gap-3">
-            {/* Mobile search */}
+          {/* =====================================================
+              RIGHT ACTIONS
+          ====================================================== */}
+
+          <div
+            className="
+              ml-auto
+              flex
+              shrink-0
+              items-center
+              gap-2.5
+              lg:gap-3
+            "
+          >
+            {/* Mobile Search */}
             <button
               type="button"
               onClick={() => navigate("/search")}
-              aria-label="Search page"
-              className="sm:hidden inline-flex items-center justify-center p-2 text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--line-subtle)] rounded-full transition-all duration-150 active:scale-95"
+              aria-label="Search articles"
+              className="
+                inline-flex
+                items-center
+                justify-center
+                rounded-full
+                p-2
+                text-[var(--text-muted)]
+                transition-all
+                duration-150
+                hover:bg-[var(--line-subtle)]
+                hover:text-[var(--text)]
+                active:scale-95
+                sm:hidden
+              "
             >
-              <AiOutlineSearch className="w-4 h-4" />
+              <AiOutlineSearch className="h-4 w-4" />
             </button>
 
-            {/* Theme Toggle */}
+            {/* ===================================================
+                THEME TOGGLE
+            ==================================================== */}
+
             <button
               type="button"
               onClick={() => dispatch(toggleTheme())}
               aria-label={`Switch to ${
                 theme === "light" ? "dark" : "light"
               } mode`}
-              className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-[var(--line)] text-[var(--text)] hover:text-[var(--teal-700)] dark:hover:text-[var(--accent)] hover:border-[var(--teal-500)] bg-[var(--surface)] transition-all duration-200 hover:-translate-y-0.5 hover:scale-110 hover:shadow-md active:scale-95 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal-500)]"
+              className="
+                inline-flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-[var(--line)]
+                bg-[var(--surface)]
+                text-[var(--text)]
+                shadow-sm
+                transition-all
+                duration-200
+                hover:-translate-y-0.5
+                hover:scale-110
+                hover:border-[var(--teal-500)]
+                hover:shadow-md
+                hover:text-[var(--teal-700)]
+                active:scale-95
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-[var(--teal-500)]
+                dark:hover:text-[var(--accent)]
+              "
             >
               {theme === "light" ? (
-                <FaSun className="w-4 h-4 text-amber-500" />
+                <FaSun className="h-4 w-4 text-amber-500" />
               ) : (
-                <FaMoon className="w-4 h-4 text-[var(--accent)]" />
+                <FaMoon className="h-4 w-4 text-[var(--accent)]" />
               )}
             </button>
 
-            {/* User Dropdown or Sign In */}
+            {/* ===================================================
+                USER
+            ==================================================== */}
+
             {currentUser ? (
-              <div className="relative" ref={userDropdownRef}>
+              <div
+                className="relative"
+                ref={userDropdownRef}
+              >
                 <button
                   type="button"
-                  onClick={() => setUserMenuOpen((prev) => !prev)}
+                  onClick={() =>
+                    setUserMenuOpen((prev) => !prev)
+                  }
                   aria-expanded={userMenuOpen}
                   aria-haspopup="true"
                   aria-label="Open user menu"
-                  className="flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal-500)]"
+                  className="
+                    flex
+                    items-center
+                    justify-center
+                    rounded-full
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[var(--teal-500)]
+                  "
                 >
                   <img
                     src={currentUser.profilePicture}
-                    alt={currentUser.username || "User avatar"}
-                    className="w-8 h-8 rounded-full object-cover border border-[var(--line)] hover:border-[var(--teal-500)] hover:shadow-sm transition-all duration-150"
+                    alt={
+                      currentUser.username ||
+                      "User avatar"
+                    }
+                    className="
+                      h-8
+                      w-8
+                      rounded-full
+                      border
+                      border-[var(--line)]
+                      object-cover
+                      transition-all
+                      duration-150
+                      hover:border-[var(--teal-500)]
+                      hover:shadow-sm
+                    "
                   />
                 </button>
 
-                {/* User Popover Menu */}
+                {/* User Menu */}
                 {userMenuOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-52 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-2 shadow-lg z-50 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150"
+                    className="
+                      absolute
+                      right-0
+                      z-50
+                      mt-2
+                      w-52
+                      rounded-2xl
+                      border
+                      border-[var(--line)]
+                      bg-[var(--surface)]
+                      p-2
+                      shadow-lg
+                      backdrop-blur-xl
+                      animate-in
+                      fade-in
+                      slide-in-from-top-2
+                      duration-150
+                    "
                     style={{
-                      WebkitBackdropFilter: "blur(18px)",
+                      WebkitBackdropFilter:
+                        "blur(18px)",
                     }}
                   >
-                    <div className="px-3 py-2 border-b border-[var(--line)] mb-1">
-                      <p className="text-xs font-semibold text-[var(--text)] truncate">
+                    <div
+                      className="
+                        mb-1
+                        border-b
+                        border-[var(--line)]
+                        px-3
+                        py-2
+                      "
+                    >
+                      <p className="truncate text-xs font-semibold text-[var(--text)]">
                         @{currentUser.username}
                       </p>
-                      <p className="text-[11px] text-[var(--text-muted)] truncate">
+
+                      <p className="truncate text-[11px] text-[var(--text-muted)]">
                         {currentUser.email}
                       </p>
                     </div>
 
                     <Link
                       to="/dashboard?tab=profile"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex w-full items-center px-3 py-2 text-xs rounded-xl text-[var(--text)] hover:bg-[var(--line-subtle)] hover:text-[var(--teal-700)] dark:hover:text-[var(--accent)] transition-colors"
+                      onClick={() =>
+                        setUserMenuOpen(false)
+                      }
+                      className="
+                        flex
+                        w-full
+                        items-center
+                        rounded-xl
+                        px-3
+                        py-2
+                        text-xs
+                        text-[var(--text)]
+                        transition-colors
+                        hover:bg-[var(--line-subtle)]
+                        hover:text-[var(--teal-700)]
+                        dark:hover:text-[var(--accent)]
+                      "
                     >
                       Profile & Dashboard
                     </Link>
@@ -311,7 +666,20 @@ export default function Header() {
                     <button
                       type="button"
                       onClick={handleSignout}
-                      className="flex w-full items-center px-3 py-2 text-xs rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors"
+                      className="
+                        flex
+                        w-full
+                        items-center
+                        rounded-xl
+                        px-3
+                        py-2
+                        text-xs
+                        text-rose-600
+                        transition-colors
+                        hover:bg-rose-50
+                        dark:text-rose-400
+                        dark:hover:bg-rose-950/20
+                      "
                     >
                       Sign Out
                     </button>
@@ -319,61 +687,151 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <div className="hidden sm:flex items-center">
+              <div className="hidden items-center sm:flex">
                 <Link
                   to="/sign-in"
-                  className="inline-flex items-center justify-center gap-2 px-5 lg:px-6 py-2.5 rounded-full text-sm font-semibold text-white !text-white bg-gradient-to-r from-[var(--teal-700)] to-[var(--teal-900)] dark:from-[var(--accent)] dark:to-[var(--accent-cyan)] dark:text-[#0a0f0f] shadow-sm hover:-translate-y-0.5 hover:scale-105 hover:shadow-md active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal-500)]"
+                  className="
+                    inline-flex
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-full
+                    bg-gradient-to-r
+                    from-[var(--teal-700)]
+                    to-[var(--teal-900)]
+                    px-5
+                    py-2.5
+                    text-sm
+                    font-semibold
+                    !text-white
+                    shadow-sm
+                    transition-all
+                    duration-200
+                    hover:-translate-y-0.5
+                    hover:scale-105
+                    hover:shadow-md
+                    active:scale-[0.98]
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[var(--teal-500)]
+                    lg:px-6
+                    dark:from-[var(--accent)]
+                    dark:to-[var(--accent-cyan)]
+                    dark:text-[#0a0f0f]
+                  "
                 >
-                  <FiUser className="w-4 h-4" aria-hidden="true" />
+                  <FiUser
+                    className="h-4 w-4"
+                    aria-hidden="true"
+                  />
+
                   <span>Sign In</span>
                 </Link>
               </div>
             )}
 
-            {/* Mobile Hamburger */}
+            {/* ===================================================
+                MOBILE MENU BUTTON
+            ==================================================== */}
+
             <button
               type="button"
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              onClick={() =>
+                setMobileMenuOpen((prev) => !prev)
+              }
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-navigation"
               aria-label="Toggle navigation menu"
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-full text-[var(--text)] hover:bg-[var(--line-subtle)] transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal-500)]"
+              className="
+                inline-flex
+                items-center
+                justify-center
+                rounded-full
+                p-2
+                text-[var(--text)]
+                transition-all
+                duration-150
+                hover:bg-[var(--line-subtle)]
+                active:scale-95
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-[var(--teal-500)]
+                md:hidden
+              "
             >
               {mobileMenuOpen ? (
-                <AiOutlineClose className="w-5 h-5" />
+                <AiOutlineClose className="h-5 w-5" />
               ) : (
-                <HiMenuAlt3 className="w-5 h-5" />
+                <HiMenuAlt3 className="h-5 w-5" />
               )}
             </button>
           </div>
         </nav>
 
-        {/* MOBILE NAVIGATION */}
+        {/* =========================================================
+            MOBILE NAVIGATION
+        ========================================================== */}
+
         {mobileMenuOpen && (
           <div
             id="mobile-navigation"
-            className="md:hidden mt-2 p-4 rounded-3xl border border-[var(--line)] bg-[var(--surface)] shadow-lg backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200"
+            className="
+              mt-2
+              rounded-3xl
+              border
+              border-[var(--line)]
+              bg-[var(--surface)]
+              p-4
+              shadow-lg
+              backdrop-blur-xl
+              animate-in
+              fade-in
+              slide-in-from-top-2
+              duration-200
+              md:hidden
+            "
             style={{
               WebkitBackdropFilter: "blur(18px)",
             }}
           >
             <div className="flex flex-col gap-1">
+              {/* Main Links */}
               {navLinks.map((link) => {
                 const isActive =
                   link.href === "/"
                     ? path === "/"
-                    : path === link.href || path.startsWith(`${link.href}/`);
+                    : path === link.href ||
+                      path.startsWith(`${link.href}/`);
 
                 return (
                   <Link
                     key={link.name}
                     to={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`px-4 py-2.5 rounded-2xl text-sm font-medium transition-all ${
-                      isActive
-                        ? "bg-[var(--line-subtle)] text-[var(--teal-700)] dark:text-[var(--accent)] font-semibold"
-                        : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--line-subtle)]"
-                    }`}
+                    onClick={() =>
+                      setMobileMenuOpen(false)
+                    }
+                    className={`
+                      rounded-2xl
+                      px-4
+                      py-2.5
+                      text-sm
+                      font-medium
+                      transition-all
+                      ${
+                        isActive
+                          ? `
+                            bg-[var(--line-subtle)]
+                            font-semibold
+                            text-[var(--teal-700)]
+                            dark:text-[var(--accent)]
+                          `
+                          : `
+                            text-[var(--text-muted)]
+                            hover:bg-[var(--line-subtle)]
+                            hover:text-[var(--text)]
+                          `
+                      }
+                    `}
                   >
                     {link.name}
                   </Link>
@@ -381,29 +839,87 @@ export default function Header() {
               })}
 
               {/* Mobile Search */}
-              <Link
-                to="/search"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--line-subtle)] transition-all"
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/search");
+                }}
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  rounded-2xl
+                  px-4
+                  py-2.5
+                  text-left
+                  text-sm
+                  font-medium
+                  text-[var(--text-muted)]
+                  transition-all
+                  hover:bg-[var(--line-subtle)]
+                  hover:text-[var(--text)]
+                "
               >
-                <AiOutlineSearch className="w-4 h-4" />
+                <AiOutlineSearch className="h-4 w-4" />
                 Search
-              </Link>
+              </button>
 
+              {/* Mobile Auth */}
               {!currentUser && (
-                <div className="pt-2 mt-2 border-t border-[var(--line)] flex flex-col gap-2">
+                <div
+                  className="
+                    mt-2
+                    flex
+                    flex-col
+                    gap-2
+                    border-t
+                    border-[var(--line)]
+                    pt-2
+                  "
+                >
                   <Link
                     to="/sign-in"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-center py-2 text-sm font-medium rounded-xl border border-[var(--line)] text-[var(--text)] hover:border-[var(--teal-500)] transition-colors"
+                    onClick={() =>
+                      setMobileMenuOpen(false)
+                    }
+                    className="
+                      w-full
+                      rounded-xl
+                      border
+                      border-[var(--line)]
+                      py-2
+                      text-center
+                      text-sm
+                      font-medium
+                      text-[var(--text)]
+                      transition-colors
+                      hover:border-[var(--teal-500)]
+                    "
                   >
                     Sign In
                   </Link>
 
                   <Link
                     to="/sign-up"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-center py-2 text-sm font-semibold rounded-xl text-white !text-white bg-gradient-to-r from-[var(--teal-700)] to-[var(--teal-900)] dark:from-[var(--accent)] dark:to-[var(--accent-cyan)] dark:text-[#0a0f0f]"
+                    onClick={() =>
+                      setMobileMenuOpen(false)
+                    }
+                    className="
+                      w-full
+                      rounded-xl
+                      bg-gradient-to-r
+                      from-[var(--teal-700)]
+                      to-[var(--teal-900)]
+                      py-2
+                      text-center
+                      text-sm
+                      font-semibold
+                      !text-white
+                      dark:from-[var(--accent)]
+                      dark:to-[var(--accent-cyan)]
+                      dark:text-[#0a0f0f]
+                    "
                   >
                     Sign Up
                   </Link>

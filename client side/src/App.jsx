@@ -27,39 +27,42 @@ function AppContent() {
     location.pathname === "/sign-up";
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <ScrollToTop />
 
-      {/* Header is visible on ALL pages */}
+      {/* Header */}
       <Header />
 
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/post/:postSlug" element={<PostPage />} />
+      {/* Main content area */}
+      <main className="flex-1">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/post/:postSlug" element={<PostPage />} />
 
-        {/* Authentication Routes */}
-        <Route path="/sign-in" element={<Signin />} />
-        <Route path="/sign-up" element={<Signup />} />
+          {/* Authentication Routes */}
+          <Route path="/sign-in" element={<Signin />} />
+          <Route path="/sign-up" element={<Signup />} />
 
-        {/* Private Routes */}
-        <Route element={<PrivateRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Route>
+          {/* Private Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
 
-        {/* Admin Routes */}
-        <Route element={<OnlyAdminPrivateRoute />}>
-          <Route path="/create-post" element={<CreatePost />} />
-          <Route path="/update-post/:postId" element={<UpdatePost />} />
-        </Route>
-      </Routes>
+          {/* Admin Routes */}
+          <Route element={<OnlyAdminPrivateRoute />}>
+            <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/update-post/:postId" element={<UpdatePost />} />
+          </Route>
+        </Routes>
+      </main>
 
       {/* Footer hidden on Sign In / Sign Up */}
       {!isAuthPage && <Footer />}
-    </>
+    </div>
   );
 }
 

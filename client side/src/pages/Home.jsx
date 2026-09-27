@@ -15,14 +15,19 @@ function usePrefersReducedMotion() {
     setReduced(mq.matches);
 
     const handler = (e) => setReduced(e.matches);
-    mq.addEventListener
-      ? mq.addEventListener("change", handler)
-      : mq.addListener(handler);
+
+    if (mq.addEventListener) {
+      mq.addEventListener("change", handler);
+    } else {
+      mq.addListener(handler);
+    }
 
     return () => {
-      mq.removeEventListener
-        ? mq.removeEventListener("change", handler)
-        : mq.removeListener(handler);
+      if (mq.removeEventListener) {
+        mq.removeEventListener("change", handler);
+      } else {
+        mq.removeListener(handler);
+      }
     };
   }, []);
 
@@ -48,6 +53,7 @@ function useInViewOnce(options) {
     }, options);
 
     observer.observe(node);
+
     return () => observer.disconnect();
   }, [options]);
 
@@ -69,44 +75,64 @@ function HeroGlobe({ reducedMotion }) {
 
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      width / height,
+      0.1,
+      100
+    );
+
     camera.position.z = 4.2;
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
     });
+
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height);
     renderer.domElement.style.display = "block";
     renderer.domElement.style.pointerEvents = "none";
+
     mountEl.appendChild(renderer.domElement);
 
     // Lightweight, clearly-visible wireframe globe
     const geometry = new THREE.IcosahedronGeometry(1.6, 2);
+
     const material = new THREE.MeshBasicMaterial({
-      color: 0x0d9488, // teal-600 range, enough contrast on mint bg
+      color: 0x0d9488,
       wireframe: true,
       transparent: true,
       opacity: 0.42,
     });
+
     const globe = new THREE.Mesh(geometry, material);
     scene.add(globe);
 
-    // Thin outer ring for a bit of depth, still light on performance
+    // Thin outer ring for a bit of depth
     const outerGeometry = new THREE.IcosahedronGeometry(1.95, 1);
+
     const outerMaterial = new THREE.MeshBasicMaterial({
-      color: 0x22d3ee, // cyan-400
+      color: 0x22d3ee,
       wireframe: true,
       transparent: true,
       opacity: 0.18,
     });
+
     const outerGlobe = new THREE.Mesh(outerGeometry, outerMaterial);
     scene.add(outerGlobe);
 
     let frameId = null;
-    const mouse = { x: 0, y: 0 };
-    const targetRotation = { x: 0, y: 0 };
+
+    const mouse = {
+      x: 0,
+      y: 0,
+    };
+
+    const targetRotation = {
+      x: 0,
+      y: 0,
+    };
 
     const handleMouseMove = (e) => {
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -124,11 +150,15 @@ function HeroGlobe({ reducedMotion }) {
         globe.rotation.y += 0.002;
         outerGlobe.rotation.y -= 0.0012;
 
-        // Subtle mouse parallax, smoothed toward target
+        // Subtle mouse parallax
         targetRotation.x = mouse.y * 0.15;
-        targetRotation.y += (mouse.x * 0.2 - targetRotation.y) * 0.02;
 
-        globe.rotation.x += (targetRotation.x - globe.rotation.x) * 0.05;
+        targetRotation.y +=
+          (mouse.x * 0.2 - targetRotation.y) * 0.02;
+
+        globe.rotation.x +=
+          (targetRotation.x - globe.rotation.x) * 0.05;
+
         outerGlobe.rotation.x = globe.rotation.x;
       }
 
@@ -136,7 +166,7 @@ function HeroGlobe({ reducedMotion }) {
     };
 
     if (reducedMotion) {
-      // Render a single static frame, no loop, no listeners
+      // Render a single static frame
       renderer.render(scene, camera);
     } else {
       animate();
@@ -145,14 +175,18 @@ function HeroGlobe({ reducedMotion }) {
     // Responsive sizing
     const handleResize = () => {
       if (!mountEl) return;
+
       width = mountEl.clientWidth || 1;
       height = mountEl.clientHeight || 1;
+
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+
       renderer.setSize(width, height);
     };
 
     let resizeObserver;
+
     if (typeof ResizeObserver !== "undefined") {
       resizeObserver = new ResizeObserver(handleResize);
       resizeObserver.observe(mountEl);
@@ -161,8 +195,12 @@ function HeroGlobe({ reducedMotion }) {
     }
 
     return () => {
-      if (frameId) cancelAnimationFrame(frameId);
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
+
       window.removeEventListener("mousemove", handleMouseMove);
+
       if (resizeObserver) {
         resizeObserver.disconnect();
       } else {
@@ -171,14 +209,20 @@ function HeroGlobe({ reducedMotion }) {
 
       geometry.dispose();
       material.dispose();
+
       outerGeometry.dispose();
       outerMaterial.dispose();
+
       renderer.dispose();
 
-      if (renderer.domElement && renderer.domElement.parentNode === mountEl) {
+      if (
+        renderer.domElement &&
+        renderer.domElement.parentNode === mountEl
+      ) {
         mountEl.removeChild(renderer.domElement);
       }
     };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reducedMotion]);
 
@@ -195,16 +239,23 @@ function HeroGlobe({ reducedMotion }) {
 export default function Home() {
   const [posts, setPosts] = useState([]);
   const [mounted, setMounted] = useState(false);
+
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const [gridRef, gridInView] = useInViewOnce({ threshold: 0.15 });
+  const [gridRef, gridInView] = useInViewOnce({
+    threshold: 0.15,
+  });
 
   // Fetch recent posts on page load
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch(BASE_URL + "/api/post/getposts?limit=9");
+        const res = await fetch(
+          BASE_URL + "/api/post/getposts?limit=9"
+        );
+
         const data = await res.json();
+
         if (res.ok) {
           setPosts(data.posts);
         }
@@ -222,7 +273,9 @@ export default function Home() {
       setMounted(true);
       return;
     }
+
     const t = requestAnimationFrame(() => setMounted(true));
+
     return () => cancelAnimationFrame(t);
   }, [prefersReducedMotion]);
 
@@ -230,24 +283,31 @@ export default function Home() {
     prefersReducedMotion
       ? "opacity-100 translate-y-0"
       : `transition-all duration-700 [transition-timing-function:cubic-bezier(.2,.8,.2,1)] ${
-          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+          mounted
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-6"
         }`;
 
   const entranceStyle = (delayMs) =>
-    prefersReducedMotion ? undefined : { transitionDelay: `${delayMs}ms` };
+    prefersReducedMotion
+      ? undefined
+      : {
+          transitionDelay: `${delayMs}ms`,
+        };
 
   return (
     <div className="overflow-x-hidden">
       {/* ============================================================ */}
       {/* HERO SECTION                                                  */}
       {/* ============================================================ */}
+
       <section className="relative overflow-hidden">
-        {/* Decorative background layers (subtle, non-interactive) */}
+        {/* Decorative background layers */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10"
         >
-          {/* soft radial glow */}
+          {/* Soft radial glow */}
           <div
             className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full blur-3xl opacity-30"
             style={{
@@ -255,6 +315,7 @@ export default function Home() {
                 "radial-gradient(circle, var(--teal-500) 0%, transparent 70%)",
             }}
           />
+
           <div
             className="absolute top-1/3 -right-32 w-[380px] h-[380px] rounded-full blur-3xl opacity-20"
             style={{
@@ -262,7 +323,8 @@ export default function Home() {
                 "radial-gradient(circle, var(--cyan-500) 0%, transparent 70%)",
             }}
           />
-          {/* faint dotted pattern */}
+
+          {/* Faint dotted pattern */}
           <div
             className="absolute inset-0 opacity-[0.15]"
             style={{
@@ -273,7 +335,8 @@ export default function Home() {
           />
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32">
+        {/* FIXED: compact spacing below navbar */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 lg:pt-10 pb-20 sm:pb-28 lg:pb-32">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-10">
             {/* LEFT: editorial content */}
             <div className="w-full lg:w-[54%] flex flex-col gap-5 sm:gap-6 text-center lg:text-left items-center lg:items-start">
@@ -283,6 +346,7 @@ export default function Home() {
                 style={entranceStyle(80)}
               >
                 <span className="h-px w-8 bg-gradient-to-r from-[var(--teal-500)] to-[var(--cyan-500)]" />
+
                 <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.15em] text-[var(--teal-700)] dark:text-[var(--accent)]">
                   Thoughts on the web
                 </span>
@@ -310,8 +374,8 @@ export default function Home() {
                 style={entranceStyle(310)}
               >
                 Here you'll find a variety of articles and tutorials on
-                topics such as web development, software engineering, and
-                programming languages.
+                topics such as web development, software engineering,
+                and programming languages.
               </p>
 
               {/* View all posts CTA */}
@@ -325,11 +389,13 @@ export default function Home() {
                 >
                   <span className="relative">
                     View all posts
+
                     <span
                       aria-hidden="true"
                       className="pointer-events-none absolute -bottom-0.5 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-gradient-to-r from-[var(--teal-500)] to-[var(--cyan-500)] transition-transform duration-300 ease-out group-hover:scale-x-100"
                     />
                   </span>
+
                   <span
                     aria-hidden="true"
                     className="transition-transform duration-200 ease-out group-hover:translate-x-[3px]"
@@ -351,7 +417,9 @@ export default function Home() {
               }`}
             >
               <div className="relative w-full max-w-[300px] sm:max-w-[380px] lg:max-w-none lg:w-full aspect-square">
-                <HeroGlobe reducedMotion={prefersReducedMotion} />
+                <HeroGlobe
+                  reducedMotion={prefersReducedMotion}
+                />
               </div>
             </div>
           </div>
@@ -361,6 +429,7 @@ export default function Home() {
       {/* ============================================================ */}
       {/* CTA / RESOURCE SECTION                                        */}
       {/* ============================================================ */}
+
       <section className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div
@@ -383,6 +452,7 @@ export default function Home() {
                 >
                   Want to learn more about web development?
                 </h2>
+
                 <p className="text-sm sm:text-base leading-[1.7] text-[var(--text-muted)] mt-3 max-w-[480px] mx-auto md:mx-0">
                   Check out these resources with JavaScript projects
                 </p>
@@ -395,11 +465,13 @@ export default function Home() {
                 >
                   <span className="relative">
                     View Resources
+
                     <span
                       aria-hidden="true"
                       className="pointer-events-none absolute -bottom-0.5 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-gradient-to-r from-[var(--teal-500)] to-[var(--cyan-500)] transition-transform duration-300 ease-out group-hover:scale-x-100"
                     />
                   </span>
+
                   <span
                     aria-hidden="true"
                     className="transition-transform duration-200 ease-out group-hover:translate-x-[3px]"
@@ -411,7 +483,9 @@ export default function Home() {
 
               <div
                 className="shrink-0 rounded-2xl p-6 sm:p-8"
-                style={{ backgroundColor: "rgba(20,184,166,0.08)" }}
+                style={{
+                  backgroundColor: "rgba(20,184,166,0.08)",
+                }}
               >
                 <img
                   src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png"
@@ -427,13 +501,18 @@ export default function Home() {
       {/* ============================================================ */}
       {/* RECENT POSTS SECTION                                          */}
       {/* ============================================================ */}
+
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         {posts && posts.length > 0 && (
-          <div ref={gridRef} className="flex flex-col gap-10">
+          <div
+            ref={gridRef}
+            className="flex flex-col gap-10"
+          >
             <div className="flex flex-col items-center gap-2 text-center">
               <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.15em] text-[var(--teal-700)] dark:text-[var(--accent)]">
                 Recent Stories
               </span>
+
               <h2
                 className="font-bold tracking-tight text-[var(--text)]"
                 style={{
@@ -458,7 +537,9 @@ export default function Home() {
                   style={
                     prefersReducedMotion
                       ? undefined
-                      : { transitionDelay: `${index * 100}ms` }
+                      : {
+                          transitionDelay: `${index * 100}ms`,
+                        }
                   }
                 >
                   <PostCard post={post} />
@@ -473,11 +554,13 @@ export default function Home() {
             >
               <span className="relative">
                 View all posts
+
                 <span
                   aria-hidden="true"
                   className="pointer-events-none absolute -bottom-0.5 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-gradient-to-r from-[var(--teal-500)] to-[var(--cyan-500)] transition-transform duration-300 ease-out group-hover:scale-x-100"
                 />
               </span>
+
               <span
                 aria-hidden="true"
                 className="transition-transform duration-200 ease-out group-hover:translate-x-[3px]"
